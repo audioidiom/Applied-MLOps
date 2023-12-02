@@ -1,1 +1,1 @@
-- [ ] поставить poetry поверх conda или miniconda
+- [x] поставить poetry поверх conda или miniconda
