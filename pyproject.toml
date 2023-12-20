@@ -1,16 +1,19 @@
 [tool.poetry]
-name = "hw1"
+name = "ml-hw-1"
 version = "0.1.0"
-description = ""
+description = "Applied MLOps project with train and infer"
 authors = ["audioidiom <audioidiom@yandex.ru>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-pandas = "^2.1.3"
+pandas = "^2.1.4"
 numpy = "^1.26.2"
-matplotlib = "^3.8.2"
 scikit-learn = "^1.3.2"
+skops = "^0.9.0"
+fastapi = "^0.105.0"
+uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
+pydantic = "^2.5.2"
 
 
 [build-system]
