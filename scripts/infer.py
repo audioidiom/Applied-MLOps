@@ -2,7 +2,7 @@ import random
 import skops.io as skops
 import pandas as pd
 import numpy as np
-import scripts.preprocessing as pp
+import preprocessing as pp
 
 random.seed(42)
 np.random.seed(42)
