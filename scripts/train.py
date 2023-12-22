@@ -8,6 +8,7 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error as MSE
 from sklearn.metrics import r2_score
 
+
 random.seed(42)
 np.random.seed(42)
 

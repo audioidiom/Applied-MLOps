@@ -5,6 +5,7 @@ import pandas as pd
 import preprocessing as pp
 import skops.io as skops
 
+
 random.seed(42)
 np.random.seed(42)
 
