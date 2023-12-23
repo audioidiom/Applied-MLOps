@@ -1,0 +1,4 @@
+[core]
+    remote = dataremote
+['remote "dataremote"']
+    url = gdrive://1kJFjuYAd8XkMz5o9a0k0WjGCNreW4rCg
