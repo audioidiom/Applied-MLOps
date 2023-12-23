@@ -1,4 +1,4 @@
 **/__pycache__/
-*.csv
 .venv
 .python-version
+/data
