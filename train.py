@@ -3,7 +3,9 @@ import random
 import numpy as np
 import pandas as pd
 import skops.io as skops
-from sklearn.linear_model import Ridge
+from dvc.api import DVCFileSystem
+
+# from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error as MSE
 from sklearn.metrics import r2_score
 
@@ -15,10 +17,15 @@ np.random.seed(42)
 
 
 def train():
-    df_train = pd.read_csv(
-        """https://raw.githubusercontent.com/
-        Murcha1990/MLDS_ML_2022/main/Hometasks/HT1/cars_train.csv"""
-    )
+    # Загружаем данные из GDrive
+    url_repo = "git@github.com:audioidiom/Applied-MLOps.git"
+    rev = "master"
+    fs = DVCFileSystem(url_repo, rev)
+    path = "data"
+    fs.get("data", path, recursive=True)
+
+    train_path = path + "/" + "datasets/" + "cars_train.csv"
+    df_train = pd.read_csv(train_path)
 
     print("Train data shape:", df_train.shape)
 
@@ -57,9 +64,12 @@ def train():
     X_train_preprocessed = X_train_preprocessed.to_numpy()
 
     # Обучение
-    ridge_reg = Ridge(alpha=506)
-    ridge_reg.fit(X_train_preprocessed, y_train)
-    skops.dump(ridge_reg, "main_model/ridge.skops")
+    # ridge_reg = Ridge(alpha=506)
+    # ridge_reg.fit(X_train_preprocessed, y_train)
+    # skops.dump(ridge_reg, "data/main_model/ridge.skops")
+
+    # ridge_reg = skops.load("data/main_model/ridge.skops")
+    ridge_reg = skops.load("data/main_model/ridge.skops", trusted=True)
 
     # Оценка модели
     y_pred = ridge_reg.predict(X_train_preprocessed)

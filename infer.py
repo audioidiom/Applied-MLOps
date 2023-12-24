@@ -3,6 +3,7 @@ import random
 import numpy as np
 import pandas as pd
 import skops.io as skops
+from dvc.api import DVCFileSystem
 
 import preprocessing as pp
 
@@ -12,10 +13,15 @@ np.random.seed(42)
 
 
 def infer():
-    df_test = pd.read_csv(
-        """https://raw.githubusercontent.com/
-        Murcha1990/MLDS_ML_2022/main/Hometasks/HT1/cars_test.csv"""
-    )
+    # Загружаем данные из GDrive
+    url_repo = "git@github.com:audioidiom/Applied-MLOps.git"
+    rev = "master"
+    fs = DVCFileSystem(url_repo, rev)
+    path = "data"
+    fs.get("data", path, recursive=True)
+
+    test_path = path + "/" + "datasets/" + "cars_test.csv"
+    df_test = pd.read_csv(test_path)
 
     print("Test data shape: ", df_test.shape)
 
@@ -53,12 +59,12 @@ def infer():
     X_test_preprocessed = X_test_preprocessed.to_numpy()
 
     # Импорт модели
-    # ridge_reg = skops.load("main_model/ridge.skops", trusted=False)
-    ridge_reg = skops.load("main_model/ridge.skops", trusted=True)
+    # ridge_reg = skops.load("data/main_model/ridge.skops")
+    ridge_reg = skops.load("data/main_model/ridge.skops", trusted=True)
 
     # Получаем предсказания модели и сохраняем их
     y_pred = ridge_reg.predict(X_test_preprocessed)
-    pd.Series(y_pred).to_csv("y_pred.csv")
+    pd.Series(y_pred).to_csv("data/predictions/y_pred.csv")
 
 
 if __name__ == "__main__":

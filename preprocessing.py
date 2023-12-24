@@ -65,12 +65,14 @@ def filling_na_with_medians(df, mode):
     if mode == "train":
         na_replacer = impute.SimpleImputer(strategy="median")
         na_replacer.fit(X_nums_na)
-        skops.dump(na_replacer, "preprocessing_models/median_imputer.skops")
+        skops.dump(
+            na_replacer, "data/preprocessing_models/median_imputer.skops"
+        )
     elif mode == "infer":
         # na_replacer = skops.load(
-        #     "preprocessing_models/median_imputer.skops")
+        #     "data/preprocessing_models/median_imputer.skops")
         na_replacer = skops.load(
-            "preprocessing_models/median_imputer.skops", trusted=True
+            "data/preprocessing_models/median_imputer.skops", trusted=True
         )
     else:
         raise ValueError('Wrong mode value - requires "train"/"infer"')
@@ -94,13 +96,13 @@ def normalize_numerical(X, mode):
         normalizer.fit(X_num)
         X_num_scaled = normalizer.transform(X_num)
         skops.dump(
-            normalizer, "preprocessing_models/normalizer_for_nums.skops"
+            normalizer, "data/preprocessing_models/normalizer_for_nums.skops"
         )
     elif mode == "infer":
         # normalizer = skops.load(
-        #     "preprocessing_models/normalizer_for_nums.skops")
+        #     "data/preprocessing_models/normalizer_for_nums.skops")
         normalizer = skops.load(
-            "preprocessing_models/normalizer_for_nums.skops", trusted=True
+            "data/preprocessing_models/normalizer_for_nums.skops", trusted=True
         )
         X_num_scaled = normalizer.transform(X_num)
     else:
@@ -121,13 +123,16 @@ def encoding_categorical(X, mode):
         enc = OneHotEncoder()
         enc.fit(X_cat)
         X_cat_coded = enc.transform(X_cat).toarray()
-        skops.dump(enc, "preprocessing_models/encoder_for_categorical.skops")
+        skops.dump(
+            enc, "data/preprocessing_models/encoder_for_categorical.skops"
+        )
 
     elif mode == "infer":
         # enc = skops.load(
-        #     "preprocessing_models/encoder_for_categorical.skops")
+        #     "data/preprocessing_models/encoder_for_categorical.skops")
         enc = skops.load(
-            "preprocessing_models/encoder_for_categorical.skops", trusted=True
+            "data/preprocessing_models/encoder_for_categorical.skops",
+            trusted=True,
         )
         X_cat_coded = enc.transform(X_cat).toarray()
 
