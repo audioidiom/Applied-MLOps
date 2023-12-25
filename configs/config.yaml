@@ -19,3 +19,7 @@ infer:
   mode: 'infer'
   df_path: '${data_path}/datasets/cars_test.csv'
   pred_csv_path: '${data_path}/predictions/y_pred.csv'
+
+mlflow_global:
+  uri: "http://128.0.1.1:8080"
+  experiment_name: "Ridge best params"

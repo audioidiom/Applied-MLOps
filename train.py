@@ -1,6 +1,8 @@
 import random
 
+import git
 import hydra
+import mlflow
 import numpy as np
 import pandas as pd
 import skops.io as skops
@@ -62,18 +64,34 @@ def train(cfg):
     )
     X_train_preprocessed = X_train_preprocessed.to_numpy()
 
-    # Обучение
-    model = instantiate(cfg["train"]["model"])
-    model.fit(X_train_preprocessed, y_train)
-    skops.dump(model, cfg["model_path"])
+    # подключаемся к mlflow server
+    mlflow.set_tracking_uri(uri=cfg["mlflow_global"]["uri"])
+    mlflow.set_experiment(cfg["mlflow_global"]["experiment_name"])
 
-    # Оценка модели
-    y_pred = model.predict(X_train_preprocessed)
-    qual_metrics = {
-        "r2_train": r2_score(y_train, y_pred),
-        "mse_train": MSE(y_train, y_pred),
-    }
-    [print(f"{k}: {qual_metrics[k]}") for k in qual_metrics]
+    # получим последний git commit_id
+    repo = git.Repo(search_parent_directories=True)
+    commit_id = repo.head.object.hexsha
+
+    # Запускаем ран
+    with mlflow.start_run(tags={"git_commit_id": commit_id}):
+        # Логгируем гиперпараметры
+        mlflow.log_params(cfg["train"]["model"])
+
+        # Обучение
+        model = instantiate(cfg["train"]["model"])
+        model.fit(X_train_preprocessed, y_train)
+        skops.dump(model, cfg["model_path"])
+
+        # Оценка модели
+        y_pred = model.predict(X_train_preprocessed)
+        qual_metrics = {
+            "r2_train": r2_score(y_train, y_pred),
+            "mse_train": MSE(y_train, y_pred),
+        }
+
+        # Логгируем метрики
+        mlflow.log_metric("r2_score", qual_metrics["r2_train"])
+        mlflow.log_metric("mse", qual_metrics["mse_train"])
 
 
 if __name__ == "__main__":
