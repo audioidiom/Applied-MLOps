@@ -1,11 +1,11 @@
 import random
 
+import hydra
 import numpy as np
 import pandas as pd
 import skops.io as skops
 from dvc.api import DVCFileSystem
-
-# from sklearn.linear_model import Ridge
+from hydra.utils import instantiate
 from sklearn.metrics import mean_squared_error as MSE
 from sklearn.metrics import r2_score
 
@@ -16,16 +16,12 @@ random.seed(42)
 np.random.seed(42)
 
 
-def train():
+@hydra.main(version_base=None, config_path="configs", config_name="config")
+def train(cfg):
     # Загружаем данные из GDrive
-    url_repo = "git@github.com:audioidiom/Applied-MLOps.git"
-    rev = "master"
-    fs = DVCFileSystem(url_repo, rev)
-    path = "data"
-    fs.get("data", path, recursive=True)
-
-    train_path = path + "/" + "datasets/" + "cars_train.csv"
-    df_train = pd.read_csv(train_path)
+    fs = DVCFileSystem(cfg["source_repo"], cfg["rev"])
+    fs.get("data", cfg["data_path"], recursive=True)
+    df_train = pd.read_csv(cfg["train"]["df_path"])
 
     print("Train data shape:", df_train.shape)
 
@@ -39,9 +35,8 @@ def train():
 
     # Столбец torque просто дропнем
     df_train = df_train.drop(columns="torque")
-
     # Заполняем пустые значения медианами
-    df_train = pp.filling_na_with_medians(df_train, "train")
+    df_train = pp.filling_na_with_medians(cfg, df_train, cfg["train"]["mode"])
 
     # Кастуем часть признаков
     df_train["engine"] = df_train["engine"].astype("int64")
@@ -52,10 +47,14 @@ def train():
     X_train = df_train.drop(columns=["selling_price", "name"])
 
     # стандартизируем вещественные признаки
-    X_train_num_scaled = pp.normalize_numerical(X_train, "train")
+    X_train_num_scaled = pp.normalize_numerical(
+        cfg, X_train, cfg["train"]["mode"]
+    )
 
     # кодируем категориальные признаки
-    X_train_cat_coded = pp.encoding_categorical(X_train, "train")
+    X_train_cat_coded = pp.encoding_categorical(
+        cfg, X_train, cfg["train"]["mode"]
+    )
 
     # объединяем стандартизованный и закодированный элементы
     X_train_preprocessed = X_train_num_scaled.merge(
@@ -64,16 +63,12 @@ def train():
     X_train_preprocessed = X_train_preprocessed.to_numpy()
 
     # Обучение
-    # ridge_reg = Ridge(alpha=506)
-    # ridge_reg.fit(X_train_preprocessed, y_train)
-    # skops.dump(ridge_reg, "data/main_model/ridge.skops")
-
-    # ridge_reg = skops.load("data/main_model/ridge.skops")
-    ridge_reg = skops.load("data/main_model/ridge.skops", trusted=True)
+    model = instantiate(cfg["train"]["model"])
+    model.fit(X_train_preprocessed, y_train)
+    skops.dump(model, cfg["model_path"])
 
     # Оценка модели
-    y_pred = ridge_reg.predict(X_train_preprocessed)
-
+    y_pred = model.predict(X_train_preprocessed)
     qual_metrics = {
         "r2_train": r2_score(y_train, y_pred),
         "mse_train": MSE(y_train, y_pred),

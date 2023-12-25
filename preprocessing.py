@@ -54,7 +54,7 @@ def max_power_clean_n_cast(df):
     return df
 
 
-def filling_na_with_medians(df, mode):
+def filling_na_with_medians(cfg, df, mode):
     """Заполняем пустые значения столбцов в train и test медианами
     этих столбцов из train"""
 
@@ -65,14 +65,10 @@ def filling_na_with_medians(df, mode):
     if mode == "train":
         na_replacer = impute.SimpleImputer(strategy="median")
         na_replacer.fit(X_nums_na)
-        skops.dump(
-            na_replacer, "data/preprocessing_models/median_imputer.skops"
-        )
+        skops.dump(na_replacer, cfg["preprocessing"]["imputer_path"])
     elif mode == "infer":
-        # na_replacer = skops.load(
-        #     "data/preprocessing_models/median_imputer.skops")
         na_replacer = skops.load(
-            "data/preprocessing_models/median_imputer.skops", trusted=True
+            cfg["preprocessing"]["imputer_path"], trusted=True
         )
     else:
         raise ValueError('Wrong mode value - requires "train"/"infer"')
@@ -84,7 +80,7 @@ def filling_na_with_medians(df, mode):
     return df
 
 
-def normalize_numerical(X, mode):
+def normalize_numerical(cfg, X, mode):
     """Стандартизируем вещественные признаки,
     для теста - стандартизируем по трейну"""
 
@@ -95,14 +91,10 @@ def normalize_numerical(X, mode):
         normalizer = StandardScaler()
         normalizer.fit(X_num)
         X_num_scaled = normalizer.transform(X_num)
-        skops.dump(
-            normalizer, "data/preprocessing_models/normalizer_for_nums.skops"
-        )
+        skops.dump(normalizer, cfg["preprocessing"]["normalizer_path"])
     elif mode == "infer":
-        # normalizer = skops.load(
-        #     "data/preprocessing_models/normalizer_for_nums.skops")
         normalizer = skops.load(
-            "data/preprocessing_models/normalizer_for_nums.skops", trusted=True
+            cfg["preprocessing"]["normalizer_path"], trusted=True
         )
         X_num_scaled = normalizer.transform(X_num)
     else:
@@ -112,7 +104,7 @@ def normalize_numerical(X, mode):
     return X_num_df
 
 
-def encoding_categorical(X, mode):
+def encoding_categorical(cfg, X, mode):
     """Кодируем категориальные признаки
     с помощью One Hot Encoding"""
 
@@ -123,15 +115,11 @@ def encoding_categorical(X, mode):
         enc = OneHotEncoder()
         enc.fit(X_cat)
         X_cat_coded = enc.transform(X_cat).toarray()
-        skops.dump(
-            enc, "data/preprocessing_models/encoder_for_categorical.skops"
-        )
+        skops.dump(enc, cfg["preprocessing"]["encoder_path"])
 
     elif mode == "infer":
-        # enc = skops.load(
-        #     "data/preprocessing_models/encoder_for_categorical.skops")
         enc = skops.load(
-            "data/preprocessing_models/encoder_for_categorical.skops",
+            cfg["preprocessing"]["encoder_path"],
             trusted=True,
         )
         X_cat_coded = enc.transform(X_cat).toarray()
