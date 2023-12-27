@@ -1,3 +1,4 @@
+# TODO: логгирование для инфера
 import random
 
 import hydra

@@ -1,4 +1,4 @@
-source_repo: "git@github.com:audioidiom/applied_ml_ops.git"
+source_repo: "https://github.com/audioidiom/applied_ml_ops.git"
 rev: 'master'
 data_path: 'data'
 model_path: '${data_path}/main_model/ridge.skops'
